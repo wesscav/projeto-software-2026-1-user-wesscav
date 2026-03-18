@@ -54,8 +54,22 @@ jobs:
         key: ${{ secrets.KEY_TEST }}
         port: 22
         script: |
-          docker stop app-users
-          docker rm --force app-users
-
-          docker image prune -a
-          docker run  -d -p 80:5001 -e POSTGRES_URL=${{ secrets.POSTGRES_URL }} -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} --network=rede --name  app-user wesleyalves00/app_users2:${{ github.sha }}
+          # 1. Alinha o nome: se vai rodar como 'app-user', tem que parar o 'app-user'
+          docker stop app-user || true
+          docker rm -f app-user || true
+          
+          # 2. Limpeza automática SEM perguntar (adicionando o flag -f)
+          docker image prune -a -f
+          
+          # 3. Pull explícito para garantir integridade
+          docker pull wesleyalves00/app_users2:${{ github.sha }}
+          
+          # 4. Run com o nome correto
+          docker run -d \
+            -p 80:5001 \
+            -e POSTGRES_URL=${{ secrets.POSTGRES_URL }} \
+            -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
+            -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+            --network=rede \
+            --name app-user \
+            wesleyalves00/app_users2:${{ github.sha }}
