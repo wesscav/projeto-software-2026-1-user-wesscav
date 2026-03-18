@@ -56,4 +56,6 @@ jobs:
         script: |
           docker stop app-users
           docker rm --force app-users
+
+          docker image prune -a -f
           docker run  -d -p 80:5001 -e POSTGRES_URL=${{ secrets.POSTGRES_URL }} -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} --network=rede --name  app-user wesleyalves00/app_users2:${{ github.sha }}
